@@ -1,0 +1,318 @@
+<!DOCTYPE HTML>
+<html>
+
+<body>
+
+    <table id="productTable" border="1" width="100%">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Категория</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>ID</th>
+            </tr>
+        </thead>
+    </table>
+    <button onclick="addRow()">Добавить</button>
+
+    
+    <script>
+        const apple = {
+            name: "Яблоко",
+            category: "Фрукты",
+            count: 4,
+            price: 100,
+            id: 1
+        };
+
+        const cherry = {
+            name: "Вишня",
+            category: "Ягоды",
+            count: 100,
+            price: 500,
+            id: 2
+        };
+
+        const cucumber = {
+            name: "Огурец",
+            category: "Овощи",
+            count: 2,
+            price: 50,
+            id: 3
+        };
+
+        const products = [apple, cherry, cucumber];
+
+        const productTable = document.getElementById('productTable');
+        const tbody = document.createElement('tbody');
+        fillTable();
+
+        function getNewId() {
+
+            if(products.length === 0) {
+                return 1;
+            }
+
+            const ids = products.map(i => i.id).sort((a,b) => a-b)
+
+            for (let i = 0; i < ids.length; i++) {
+                if (ids[i] !== i + 1) {
+                return i + 1;
+                }
+            }
+            return ids.length + 1;
+        }
+
+        function isValidCount(value) {
+            const trimmedValue = value.trim();
+            const num = parseInt(trimmedValue);
+            return !isNaN(num) && trimmedValue !== '' && num.toString() === trimmedValue && num >= 0;
+        }
+
+        function isValidPrice(value) {
+            const trimmedValue = value.trim();
+            const num = parseFloat(trimmedValue);
+            return !isNaN(num) && trimmedValue !== '' && num.toString() === trimmedValue && num > 0;
+        }
+
+        function getInputRow(product) {
+            const inputName = document.createElement('input');
+            inputName.type = 'text';
+            inputName.value = product.name;
+
+            const errEmptyName = document.createElement('div');
+            errEmptyName.style.color = 'red';
+            errEmptyName.innerHTML = ''
+
+            inputName.addEventListener('input', () =>{
+                if(inputName.value.trim() === '') {
+                    errEmptyName.innerHTML = 'Введите имя продукта'
+                }
+                else {
+                    errEmptyName.innerHTML = ''
+                }
+                
+            })
+
+            const selectCategory = document.createElement('select');
+            const options = ['Фрукты', 'Овощи', 'Ягоды'];
+            options.forEach(optionText => {
+                const option = document.createElement('option');
+                option.value = optionText;
+                option.textContent = optionText;
+                selectCategory.appendChild(option);
+            });
+
+            selectCategory.value = product.category;
+
+            const inputCount = document.createElement('input');
+            inputCount.type = 'number';
+            inputCount.value = product.count;
+
+            const errNegativeCount = document.createElement('div');
+            errNegativeCount.style.color = 'red';
+            errNegativeCount.innerHTML = ''
+
+            inputCount.addEventListener('input', () =>{
+                if(isValidCount(inputCount.value)) {
+                    errNegativeCount.innerHTML = ''                
+                }
+                else {
+                    errNegativeCount.innerHTML = 'Введите корректное количество'
+                }
+                
+            })
+
+            const inputPrice = document.createElement('input');
+            inputPrice.type = 'number';
+            inputPrice.value = product.price;
+ 
+            const errNotPositivePrice = document.createElement('div');
+            errNotPositivePrice.style.color = 'red';
+            errNotPositivePrice.innerHTML = ''
+
+            inputPrice.addEventListener('input', () =>{
+                if(isValidPrice(inputPrice.value)) {
+                    errNotPositivePrice.innerHTML = ''
+                }
+                else {
+                    errNotPositivePrice.innerHTML = 'Введите корректную цену'
+                }
+                
+            })
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Сохранить';
+
+            saveButton.addEventListener('click', () => {
+                if(inputName.value.trim() === '') {
+                    errEmptyName.innerHTML = 'Введите имя продукта'
+                }
+                else if(!isValidCount(inputCount.value)){
+                    errNegativeCount.innerHTML = 'Введите корректное количество'
+                }
+                else if(!isValidPrice(inputPrice.value)) {
+                    errNotPositivePrice.innerHTML = 'Введите корректную цену'
+                }
+                else {
+                    getRowData(inputRow, product)
+                }
+            });
+
+            const inputRow = document.createElement('tr');
+            let td = document.createElement('td');
+            td.appendChild(inputName);
+            td.appendChild(errEmptyName);
+            inputRow.appendChild(td);
+
+            td = document.createElement('td');
+            td.appendChild(selectCategory);
+            inputRow.appendChild(td);
+
+            td = document.createElement('td');
+            td.appendChild(inputCount);
+            td.appendChild(errNegativeCount);
+            inputRow.appendChild(td);
+
+            td = document.createElement('td');
+            td.appendChild(inputPrice);
+            td.appendChild(errNotPositivePrice);
+            inputRow.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = product.id;
+            inputRow.appendChild(td);
+
+            inputRow.appendChild(saveButton);
+
+            return inputRow;
+        }
+
+        function getRowData(row, product) {
+
+            const inputs = row.querySelectorAll('input, select');
+
+            let i = 0;
+            for(let key in product) {
+                if (key === 'id') continue;
+                product[key] = inputs[i].value;
+                i++;
+            }
+
+            while (row.firstChild) {
+                row.removeChild(row.firstChild);
+            }
+
+            fillRow(row, product);
+        }
+
+        function fillRow(row, product) {
+            row.dataset.id = product.id;
+
+            Object.values(product).forEach(value => {
+                const td = document.createElement('td');
+                td.textContent = value;
+                row.appendChild(td);
+            })
+
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Редактировать';
+            row.appendChild(editButton);
+
+            editButton.addEventListener('click', () => {
+                editRow(product.id);
+            });
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Удалить';
+            row.appendChild(deleteButton);
+
+            deleteButton.addEventListener('click', () => {
+                products.splice(products.indexOf(product), 1);
+                fillTable();
+            });
+        }
+
+        function addRow() {
+
+            const newProduct = {
+                name: '',
+                category: 'Фрукты',
+                count: 0,
+                price: 0,
+                id: getNewId()
+            };
+            products.push(newProduct);
+
+            let newRow = document.createElement('tr');
+            newRow = getInputRow(newProduct)
+
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = 'Отмена';
+
+            cancelButton.addEventListener('click', () => {
+                while (newRow.firstChild) {
+                    newRow.removeChild(newRow.firstChild);
+                }
+                newRow.parentNode.removeChild(newRow);
+
+                const index = products.findIndex(item => item.id === newProduct.id );
+                    if (index !== -1) {
+                        products.splice(index, 1);
+                }
+            });
+
+            newRow.appendChild(cancelButton);
+
+            tbody.appendChild(newRow);
+            productTable.appendChild(tbody);
+       
+        }
+
+        function editRow(id) {
+            const index = products.findIndex(item => item.id === id);
+            if (index === -1) return;
+
+            let editingRow = document.querySelector(`#productTable tbody tr[data-id="${id}"]`);
+
+            while (editingRow.firstChild) {
+                editingRow.removeChild(editingRow.firstChild);
+            }
+            editingRow.parentNode.removeChild(editingRow);
+
+            editingRow = getInputRow(products[index]);
+
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = 'Отмена';
+
+            cancelButton.addEventListener('click', () => {
+                while (editingRow.firstChild) {
+                    editingRow.removeChild(editingRow.firstChild);
+                }
+
+                fillRow(editingRow, products[index])
+            });
+
+            editingRow.appendChild(cancelButton);
+
+            tbody.appendChild(editingRow);
+            productTable.appendChild(tbody);
+        }
+
+        function fillTable() {
+            tbody.innerHTML = '';
+
+            products.forEach(product => {
+                const newRow  = document.createElement('tr');
+                fillRow(newRow, product)
+                tbody.appendChild(newRow);
+                productTable.appendChild(tbody);             
+             });
+        }
+    
+    </script>
+
+</body>
+
+</html>
