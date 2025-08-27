@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+
+<body>
+
+    <table id="cartTable" border="1" width="100%">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Количество</th>
+                <th>Цена</th>
+            </tr>
+        </thead>
+    </table>
+
+    <p><div id="divTotal">Итого: </div></p>
+    <p><a onclick="transferData()" href="index.html">Список продуктов</a></p>
+
+    <script>
+        const productTable = document.getElementById('cartTable');
+        const tbody = document.createElement('tbody');
+
+        const cart = JSON.parse(sessionStorage.getItem('cart'))
+        if(cart === null) cart = []
+
+        fillTable();
+
+        function transferData() {
+            //saveEditingRow()
+
+            sessionStorage.setItem('cart', JSON.stringify(cart));
+            //sessionStorage.setItem('products', JSON.stringify(products));
+        }
+
+        function countTotalPrice() {
+            let totalPrice = 0
+
+            cart.forEach(product => {
+                totalPrice += product.count * product.price
+            })
+
+            const divTotal = document.getElementById('divTotal')
+            divTotal.innerText = 'Итого: ' + totalPrice
+        }
+
+        function fillTable() {
+            while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+            }
+
+            cart.forEach(product => {
+                const newRow  = document.createElement('tr');
+                fillRow(newRow, product)
+                tbody.appendChild(newRow);       
+             });
+
+            productTable.appendChild(tbody); 
+            countTotalPrice()
+        }
+
+        function fillRow(row, product) {
+            let td = document.createElement('td');
+            td.textContent = product.name;
+            row.appendChild(td);
+
+            td = document.createElement('td');
+            const inputCount = document.createElement('input');
+            inputCount.type = 'number'
+            inputCount.value = product.count
+
+            const errWrongCount = document.createElement('div');
+            errWrongCount.style.color = 'red';
+            errWrongCount.innerHTML = ''
+
+            inputCount.addEventListener('input', () => {
+                if(isValidCartCount(inputCount.value) && inputCount.value <= product.maxCount) {
+                    errWrongCount.innerHTML = '' 
+                    product.count = inputCount.value
+                    fillTable();                             
+                }
+                else {
+                    errWrongCount.innerHTML = 'Введите корректное количество'
+                }
+            })
+
+            td.appendChild(inputCount);
+            td.appendChild(errWrongCount);
+
+            row.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = product.price;
+            row.appendChild(td);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Удалить';
+            row.appendChild(deleteButton);
+
+            deleteButton.addEventListener('click', () => {
+                cart.splice(cart.indexOf(product), 1);
+                fillTable();
+            });
+        }
+
+        function isValidCartCount(value) {
+            const trimmedValue = value.trim();
+            const num = parseInt(trimmedValue);
+            return !isNaN(num) && trimmedValue !== '' && num.toString() === trimmedValue && num > 0;
+        }
+
+    </script>
+
+</body>
+
+</html>
