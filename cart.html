@@ -73,7 +73,7 @@
             errWrongCount.innerHTML = ''
 
             inputCount.addEventListener('input', () => {
-                if(isValidCartCount(inputCount.value) && inputCount.value <= product.maxCount) {
+                if(isValidCartCount(inputCount.value) && parseInt(inputCount.value) <= product.maxCount) {
                     errWrongCount.innerHTML = '' 
                     product.count = inputCount.value
                     fillTable();                             

@@ -49,7 +49,7 @@
             products.push(...[apple, cherry, cucumber])
         }
 
-        const cart = JSON.parse(sessionStorage.getItem('cart'))
+        let cart = JSON.parse(sessionStorage.getItem('cart'))
         if(cart === null) cart = []
 
         const productTable = document.getElementById('productTable');
@@ -210,6 +210,8 @@
 
             const editingCartIndex = cart.map(cartProduct => cartProduct.id ).indexOf(product.id)
             if(editingCartIndex != -1) {
+                cart[editingCartIndex].name = product.name
+                cart[editingCartIndex].price = product.price
                 cart[editingCartIndex].maxCount = product.count
             }
 
@@ -379,12 +381,23 @@
                 if(cart.some(cartProduct => cartProduct.id === product.id)) {
                     const editingCartIndex = cart.map(cartProduct => cartProduct.id ).indexOf(product.id)
 
+                    if(parseInt(product.count) < cart[editingCartIndex].count + inputCartCount.value)  {
+                        errWrongCartCount.innerHTML = 'Нет на складе'
+                        return;
+                    }
+
                     cart[editingCartIndex].name = product.name
-                    cart[editingCartIndex].count = inputCartCount.value
+                    cart[editingCartIndex].count = parseInt(inputCartCount.value) + parseInt( cart[editingCartIndex].count)
                     cart[editingCartIndex].maxCount = product.count
                     cart[editingCartIndex].price = product.price
                 }
                 else {
+
+                    if(parseInt(product.count) < inputCartCount.value)  {
+                        errWrongCartCount.innerHTML = 'Нет на складе'
+                        return;
+                    }
+
                     const newCartProduct = {
                         name: product.name,
                         count: inputCartCount.value,
