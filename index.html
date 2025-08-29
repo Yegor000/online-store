@@ -381,8 +381,8 @@
                 if(cart.some(cartProduct => cartProduct.id === product.id)) {
                     const editingCartIndex = cart.map(cartProduct => cartProduct.id ).indexOf(product.id)
 
-                    if(parseInt(product.count) < cart[editingCartIndex].count + inputCartCount.value)  {
-                        errWrongCartCount.innerHTML = 'Нет на складе'
+                    if(product.count < parseInt(cart[editingCartIndex].count) + parseInt(inputCartCount.value))  {
+                        errWrongCartCount.innerHTML = 'Нет на складе1'
                         return;
                     }
 
@@ -393,8 +393,8 @@
                 }
                 else {
 
-                    if(parseInt(product.count) < inputCartCount.value)  {
-                        errWrongCartCount.innerHTML = 'Нет на складе'
+                    if(product.count < parseInt(inputCartCount.value))  {
+                        errWrongCartCount.innerHTML = 'Нет на складе2'
                         return;
                     }
 
